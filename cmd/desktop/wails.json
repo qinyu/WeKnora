@@ -3,6 +3,8 @@
   "name": "WeKnora Lite",
   "outputfilename": "WeKnora Lite",
   "frontend:dir": "../../frontend",
+  "frontend:install": "npm ci",
+  "frontend:build": "npm run build",
   "wailsjsdir": "../../frontend/src",
   "build:tags": "desktop",
   "author": {

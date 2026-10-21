@@ -93,9 +93,14 @@ Section
     ; Paths are relative to cmd/desktop/build/windows/installer.
     File "..\..\..\..\..\LICENSE"
     File "..\..\..\..\..\THIRD_PARTY_NOTICES.md"
+    File "..\..\..\..\..\.env.lite.example"
     SetOutPath "$INSTDIR\licenses"
     File /r "..\..\..\..\..\licenses\*"
-    SetOutPath $INSTDIR
+    SetOutPath "$INSTDIR\config"
+    File /r "..\..\..\..\..\config\*"
+    SetOutPath "$INSTDIR\web"
+    File /r "..\..\..\..\..\web\*"
+    SetOutPath "$INSTDIR"
 
     CreateShortcut "$SMPROGRAMS\${INFO_PRODUCTNAME}.lnk" "$INSTDIR\${PRODUCT_EXECUTABLE}"
     CreateShortCut "$DESKTOP\${INFO_PRODUCTNAME}.lnk" "$INSTDIR\${PRODUCT_EXECUTABLE}"

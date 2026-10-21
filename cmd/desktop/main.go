@@ -203,6 +203,14 @@ func main() {
 			_ = os.Chdir(resPath)
 		}
 	}
+	// NSIS installs the exe next to config/ and web/. Windows starts it from
+	// System32, so stay next to the exe when that bundle is present.
+	if errPath == nil && strings.HasSuffix(strings.ToLower(execPath), ".exe") {
+		exeDir := filepath.Dir(execPath)
+		if _, err := os.Stat(filepath.Join(exeDir, "config", "config.yaml")); err == nil {
+			_ = os.Chdir(exeDir)
+		}
+	}
 	if _, err := os.Stat(filepath.Join("config", "config.yaml")); os.IsNotExist(err) {
 		// wails dev 的 cwd 是 cmd/desktop。仓库配置在上两级。
 		repoRoot := filepath.Clean(filepath.Join("..", ".."))

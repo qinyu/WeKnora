@@ -250,6 +250,14 @@ jobs:
           else
             bash ./scripts/check-license-bundle.sh
           fi
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            # NSIS copies repo-root web/ next to the exe. Build it before wails
+            # so the installer contains the page the window proxies.
+            (cd frontend && npm ci && npm run build)
+            rm -rf web
+            cp -r frontend/dist web
+            test -s web/index.html
+          fi
           cd cmd/desktop
           wails build -clean \
             -tags "${BUILD_TAGS}" \
