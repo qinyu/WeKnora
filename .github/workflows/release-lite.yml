@@ -186,12 +186,25 @@ jobs:
           fi
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
+      - name: Expose sqlite3.h for sqlite-vec (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          set -euo pipefail
+          go mod download github.com/mattn/go-sqlite3@v1.14.24
+          BIND="$(go env GOMODCACHE)/github.com/mattn/go-sqlite3@v1.14.24"
+          STAGE="${RUNNER_TEMP}/sqlite-inc"
+          mkdir -p "${STAGE}"
+          cp "${BIND}/sqlite3-binding.h" "${STAGE}/sqlite3.h"
+          cp "${BIND}/sqlite3-binding.h" "${STAGE}/sqlite3-binding.h"
+          cp "${BIND}/sqlite3ext.h" "${STAGE}/sqlite3ext.h"
+          echo "CGO_CFLAGS=-I${STAGE} -Wno-deprecated-declarations" >> "$GITHUB_ENV"
+
       - name: Pre-compile Go packages (Windows)
         if: runner.os == 'Windows'
         shell: bash
         run: |
           export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn
-          export CGO_CFLAGS="-Wno-deprecated-declarations"
           cd cmd/desktop
           go build -p 1 -buildvcs=false -tags "desktop,sqlite_fts5,production" -o _prebuild_tmp.exe . || true
           rm -f _prebuild_tmp.exe
@@ -203,7 +216,9 @@ jobs:
           export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn
           eval "$(./scripts/get_version.sh env)"
           LDFLAGS="$(./scripts/get_version.sh ldflags) -X 'google.golang.org/protobuf/reflect/protoregistry.conflictPolicy=warn'"
-          export CGO_CFLAGS="-Wno-deprecated-declarations"
+          if [ -z "${CGO_CFLAGS:-}" ]; then
+            export CGO_CFLAGS="-Wno-deprecated-declarations"
+          fi
 
           BUILD_TAGS="sqlite_fts5"
           NSIS_FLAG=""
